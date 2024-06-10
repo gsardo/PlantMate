@@ -5,6 +5,7 @@
 //  Created by Giuseppe Sardo on 10/6/2024.
 //
 
+import SwiftData
 import SwiftUI
 
 @main
@@ -13,5 +14,6 @@ struct PlantMateApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Plant.self)
     }
 }
