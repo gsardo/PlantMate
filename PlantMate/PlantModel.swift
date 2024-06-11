@@ -16,13 +16,15 @@ class Plant {
     var waterAmount: String
     var optimalLocation: String
     var notes: String
+    var gallery: Data?
     
-    init(plantName: String, plantPicture: Data?, waterSchedule: String, waterAmount: String, optimalLocation: String, notes: String) {
+    init(plantName: String, plantPicture: Data?, waterSchedule: String, waterAmount: String, optimalLocation: String, notes: String, gallery: Data?) {
         self.plantName = plantName
         self.plantPicture = plantPicture
         self.waterSchedule = waterSchedule
         self.waterAmount = waterAmount
         self.optimalLocation = optimalLocation
         self.notes = notes
+        self.gallery = gallery
     }
 }

@@ -16,13 +16,22 @@ struct ContentView: View {
     @Query var plants: [Plant]
     
     var body: some View {
-        NavigationStack() {
+        NavigationStack {
             List {
                 ForEach(plants) { plant in
                     NavigationLink(value: plant) {
                         HStack {
-                            Image(systemName: "leaf.circle")
-                                .foregroundStyle(.green)
+                            if let selectedPhotoData = plant.plantPicture,
+                               let uiImage = UIImage(data: selectedPhotoData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: 100, maxHeight: 100)
+                                    .clipShape(
+                                        RoundedRectangle(
+                                            cornerRadius: 10, style: .continuous)
+                                    )
+                            }
                             
                             VStack(alignment: .leading) {
                                 Text(plant.plantName)

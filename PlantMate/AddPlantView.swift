@@ -88,7 +88,7 @@ struct AddPlantView: View {
             }
             .toolbar {
                 Button("Save") {
-                    let newPlant = Plant(plantName: plantName, plantPicture: selectedPhotoData, waterSchedule: waterSchedule, waterAmount: waterAmount, optimalLocation: optimalLocation, notes: notes)
+                    let newPlant = Plant(plantName: plantName, plantPicture: selectedPhotoData, waterSchedule: waterSchedule, waterAmount: waterAmount, optimalLocation: optimalLocation, notes: notes, gallery: nil)
                     modelContext.insert(newPlant)
                     dismiss()
                 }
