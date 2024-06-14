@@ -12,7 +12,9 @@ import UserNotifications
 
 struct EditPlantView: View {
     @Environment(\.modelContext) var modelContext
-    let plant: Plant
+    
+    @Bindable var plant: Plant
+    
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var selectedPhotoData: Data?
     
