@@ -14,110 +14,70 @@ struct EditPlantView: View {
     @Environment(\.modelContext) var modelContext
     
     @Bindable var plant: Plant
-    
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var selectedPhotoData: Data?
     
+    let optimalLocations = ["Full Sun", "Filtered Light", "Bright Indoors", "Part Shaded"]
+    let waterSchedules = ["Weekly", "Fortnightly", "Monthly"]
+    let waterAmounts = ["Light", "Moderate", "Heavy"]    
+    
     var body: some View {
-        ScrollView {
-            VStack {
-                HStack {
-                    if let selectedPhotoData = plant.plantPicture,
-                       let uiImage = UIImage(data: selectedPhotoData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: 100, maxHeight: 100)
-                            .clipShape(
-                                RoundedRectangle(
-                                    cornerRadius: 10, style: .continuous)
-                            )
-                    }
-                    Text(plant.plantName)
-                        .frame(alignment: .trailing)
-                }
-                
-                Spacer()
-                Divider()
-                
-                Text("Water Schedule: \(plant.waterSchedule)")
-                Text("Water Amount: \(plant.waterAmount)")
-                Text("Optimal Location: \(plant.optimalLocation)")
-                
-                
-                Spacer()
-                Divider()
-                
-                Text("Plant Notes")
-                    .font(.headline)
-                    .frame(alignment: .leading)
-                Text(plant.notes)
-                
-                Spacer()
-                Divider()
-                
-                // Notification Reminders
-                VStack {
-                    //potentially remove this and show as a prompt to enable notifications at app launch
-                    Button("Enable Notifications") {
-                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
-                            if success {
-                                print("Notifications set")
-                            } else if let error {
-                                print(error.localizedDescription)
-                            }
-                        }
-                    }
-                    
-                    Button("Schedule next watering") {
-                        let content = UNMutableNotificationContent()
-                        content.title = "Time to water the \(plant.plantName)"
-                        content.subtitle = "Needs \(plant.waterAmount.lowercased()) watering"
-                        content.sound = UNNotificationSound.default
-                        
-                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-                        
-                        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-                        
-                        UNUserNotificationCenter.current().add(request)
-                    }
-                }
-                
-                PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    Label("Add to gallery", systemImage: "leaf.circle")
-                }
-                
-                //Show images already in the gallery
-                if let plantGallery = plant.gallery,
-                   let galleryUiImage = UIImage(data: plantGallery) {
-                    Image(uiImage: galleryUiImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 300, height: 300)
-                }
-                
-                // Show the newly uploaded image
+        Form {
+            Section {
                 if let selectedPhotoData,
                    let uiImage = UIImage(data: selectedPhotoData) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 100, height: 100)
+                        .frame(maxWidth: .infinity, maxHeight: 300)
                 }
                 
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .task(id: selectedPhoto) {
-                if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
-                    selectedPhotoData = data
+                PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                    Label("Select a picture", systemImage: "photo")
                 }
             }
-            .toolbar {
-                // look at updating the plant item, and not creating a new one
-                Button("Save") {
-                    let updatedPlant = Plant(plantName: plant.plantName, plantPicture: plant.plantPicture, waterSchedule: plant.waterSchedule, waterAmount: plant.waterAmount, optimalLocation: plant.optimalLocation, notes: plant.notes, gallery: selectedPhotoData)
-                    modelContext.insert(updatedPlant)
+            
+            Section("Plant Name") {
+                TextField("Plant name", text: $plant.plantName)
+            }
+            
+            Section("Notes") {
+                TextField("About the plant", text: $plant.notes, axis: .vertical)
+                    .lineLimit(1...5)
+            }
+            
+            Section {
+                Picker("Optimal location", selection: $plant.optimalLocation) {
+                    ForEach(optimalLocations, id: \.self) {
+                        Text($0)
+                    }
                 }
+                .pickerStyle(.menu)
+            }
+            
+            Section("Watering Schedule") {
+                Picker("Watering schedule", selection: $plant.waterSchedule) {
+                    ForEach(waterSchedules, id: \.self) {
+                        Text($0)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            
+            Section("Watering Amount") {
+                Picker("Watering amount", selection: $plant.waterAmount) {
+                    ForEach(waterAmounts, id: \.self) {
+                        Text($0)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+        }
+        .navigationTitle("Edit Plant")
+        .navigationBarTitleDisplayMode(.inline)
+        .task(id: selectedPhoto) {
+            if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
+                selectedPhotoData = data
             }
         }
     }
