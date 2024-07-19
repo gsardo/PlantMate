@@ -15,7 +15,6 @@ struct EditPlantView: View {
     
     @Bindable var plant: Plant
     @State private var selectedPhoto: PhotosPickerItem?
-    @State private var selectedPhotoData: Data?
     
     let optimalLocations = ["Full Sun", "Filtered Light", "Bright Indoors", "Part Shaded"]
     let waterSchedules = ["Weekly", "Fortnightly", "Monthly"]
@@ -24,16 +23,16 @@ struct EditPlantView: View {
     var body: some View {
         Form {
             Section {
-                if let selectedPhotoData,
+                PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                    Label("Select a picture", systemImage: "photo.badge.plus")
+                }
+                
+                if let selectedPhotoData = plant.plantPicture,
                    let uiImage = UIImage(data: selectedPhotoData) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFit()
                         .frame(maxWidth: .infinity, maxHeight: 300)
-                }
-                
-                PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    Label("Select a picture", systemImage: "photo")
                 }
             }
             
@@ -77,7 +76,7 @@ struct EditPlantView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task(id: selectedPhoto) {
             if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) {
-                selectedPhotoData = data
+                plant.plantPicture = data
             }
         }
     }
